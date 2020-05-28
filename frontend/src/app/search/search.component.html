@@ -1,0 +1,24 @@
+<form [formGroup]="searchForm" (ngSubmit)="submit()">
+  <div class="row">
+    <div class="col-8">
+      <label class="col-form-label" for="locations">Punkt podróży</label>
+      <select class="custom-select" formControlName="location" id="locations">
+        <option *ngFor="let location of locations; let i = index" [value]="locations[i].id">
+          {{locations[i].name}}
+        </option>
+      </select>
+    </div>
+    <div class="col-3">
+      <label class="col-form-label" for="times">Czas w punkcie</label>
+      <select class="custom-select" formControlName="time" id="times">
+        <option *ngFor="let time of times" [value]="time.value">
+          {{time.name}}
+        </option>
+      </select>
+    </div>
+    <div class="col-1">
+      <label class="col-form-label invisible" for="times">Dodaj</label>
+      <button class="btn btn-primary">Dodaj</button>
+    </div>
+  </div>
+</form>
