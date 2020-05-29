@@ -2,15 +2,15 @@
   <div class="row">
     <div class="col-8">
       <label class="col-form-label" for="locations">Punkt podróży</label>
-      <select class="custom-select" formControlName="location" id="locations">
-        <option *ngFor="let location of locations; let i = index" [value]="locations[i].id">
+      <select class="custom-select" formControlName="location_id" id="locations">
+        <option *ngFor="let location of locations; let i = index" [value]="locations[i].location_id">
           {{locations[i].name}}
         </option>
       </select>
     </div>
     <div class="col-3">
       <label class="col-form-label" for="times">Czas w punkcie</label>
-      <select class="custom-select" formControlName="time" id="times">
+      <select class="custom-select" formControlName="timeValue" id="times">
         <option *ngFor="let time of times" [value]="time.value">
           {{time.name}}
         </option>

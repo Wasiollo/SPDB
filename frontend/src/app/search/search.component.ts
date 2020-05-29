@@ -1,5 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
+import {SearchService} from './search.service';
 
 @Component({
   selector: 'app-search',
@@ -12,25 +13,22 @@ export class SearchComponent implements OnInit {
   locations = [];
   times = [];
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private ss: SearchService) {
   }
 
   ngOnInit(): void {
     this.searchForm = this.fb.group({
-      location: [''],
-      time: ['']
+      location_id: [],
+      timeValue: ['']
     });
-    this.locations = this.getLocations();
+    this.getLocations();
     this.times = this.getTimes();
   }
 
   getLocations() {
-    return [
-      { id: '1', name: 'order 1' },
-      { id: '2', name: 'order 2' },
-      { id: '3', name: 'order 3' },
-      { id: '4', name: 'order 4' }
-    ];
+    this.ss.getPlaces() .subscribe(data => {
+      this.locations = data.result;
+    });
   }
 
   getTimes() {
@@ -43,7 +41,10 @@ export class SearchComponent implements OnInit {
   }
 
   submit() {
-    console.log(this.searchForm.value);
+    const addPointData = this.searchForm.value;
+    addPointData.location = this.locations.find(l => l.location_id === Number(addPointData.location_id));
+    addPointData.time = this.times.find(t => t.value === Number(addPointData.timeValue));
+    this.ss.addPoint(addPointData);
   }
 
 }

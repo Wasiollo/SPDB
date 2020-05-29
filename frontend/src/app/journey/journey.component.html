@@ -1,1 +1,13 @@
-<p>journey works!</p>
+<!-- Default dropright button -->
+<div *ngFor="let point of points" class="btn-group dropright">
+  <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    {{point.location.name + " - " + point.time.name}}
+  </button>
+  <div class="dropdown-menu">
+    <button class="dropdown-item btn">Button 1</button>
+    <button class="dropdown-item btn">Button 2</button>
+    <button class="dropdown-item btn">Button 3</button>
+    <div class="dropdown-divider"></div>
+    <button class="dropdown-item btn">Button 4</button>
+  </div>
+</div>

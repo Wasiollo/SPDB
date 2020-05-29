@@ -8,6 +8,10 @@ import {MapComponent} from './map/map.component';
 import {HomeComponent} from './home/home.component';
 import {ReactiveFormsModule} from '@angular/forms';
 import {GoogleMapsModule} from '@angular/google-maps';
+import {ApiService} from './core/api.service';
+import {ToastrModule} from 'ngx-toastr';
+import {HttpClient, HttpClientModule} from '@angular/common/http';
+import {SearchService} from './search/search.service';
 
 @NgModule({
   declarations: [
@@ -19,10 +23,12 @@ import {GoogleMapsModule} from '@angular/google-maps';
   ],
   imports: [
     BrowserModule,
+    HttpClientModule,
     ReactiveFormsModule,
-    GoogleMapsModule
+    GoogleMapsModule,
+    ToastrModule.forRoot(),
   ],
-  providers: [],
+  providers: [ApiService, SearchService],
   bootstrap: [AppComponent]
 })
 export class AppModule {
