@@ -1,1 +1,22 @@
-<google-map></google-map>
+<label class="col-form-label" for="map">Mapa</label>
+<div class="row" id="map">
+  <google-map class="col-12" width="100%"
+              [zoom]="zoom"
+              [center]="center"
+              [options]="options">
+    <map-marker
+      #markerElem
+      *ngFor="let marker of markers"
+      [position]="marker.position"
+      [label]="marker.label"
+      [title]="marker.title"
+      [options]="marker.options"
+    >
+    </map-marker>
+  </google-map>
+</div>
+<div class="row">
+  <div class="col-12 ml-2 mt-2">
+    Podróż będzie trwała wieczność
+  </div>
+</div>

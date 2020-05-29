@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {SearchService} from '../search/search.service';
+import {ToastrService} from 'ngx-toastr';
 
 @Component({
   selector: 'app-journey',
@@ -8,15 +9,31 @@ import {SearchService} from '../search/search.service';
 })
 export class JourneyComponent implements OnInit {
 
-  points = [{location: {latitude: 52.2317641, location_id: 1, location_type: "trip", longitude: 21.0057996756161, name: "Pałac Kultury i Nauki"}, location_id: "1", time: { value: 0.5, name: "30 minut" }, timeValue: "0.5"}];
-  constructor(private ss: SearchService) { }
+  points = [];
+
+  constructor(private ss: SearchService, private toastr: ToastrService) {
+  }
 
   ngOnInit(): void {
     this.ss.addedPoint.subscribe(point => {
-      console.log(point);
+      if (this.points.some(p => p.location_id === point.location_id)) {
+        this.toastr.warning('Wycieczka zawiera już punkt o nazwie: ' + point.location.name);
+        return;
+      }
+
+      let shortLocationName = point.location.name.substring(0, 23);
+      if (point.location.name.length >= 23) {
+        shortLocationName += '...';
+      }
+      point.location.short_name = shortLocationName;
       this.points.push(point);
     });
 
+  }
+
+  remove(point) {
+    this.points = this.points.filter(p => p.location_id !== point.location_id);
+    this.toastr.success('Usunięto punkt - ' + point.location.name);
   }
 
 }

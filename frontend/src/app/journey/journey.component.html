@@ -1,13 +1,21 @@
-<!-- Default dropright button -->
-<div *ngFor="let point of points" class="btn-group dropright">
-  <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-    {{point.location.name + " - " + point.time.name}}
-  </button>
-  <div class="dropdown-menu">
-    <button class="dropdown-item btn">Button 1</button>
-    <button class="dropdown-item btn">Button 2</button>
-    <button class="dropdown-item btn">Button 3</button>
-    <div class="dropdown-divider"></div>
-    <button class="dropdown-item btn">Button 4</button>
+<label class="col-form-label" for="journey">Lista punktów</label>
+<div class="row" id="journey">
+  <!-- Default dropright button -->
+  <div *ngFor="let point of points" class="btn-group dropright col-12 float-left mb-2">
+    <button title="{{point.location.name + ' - ' + point.time.name}}" type="button"
+            class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      {{point.location.short_name + " - " + point.time.name}}
+    </button>
+    <div class="dropdown-menu">
+      <button class="dropdown-item btn">Button 1</button>
+      <button class="dropdown-item btn">Button 2</button>
+      <button class="dropdown-item btn">Button 3</button>
+      <div class="dropdown-divider"></div>
+      <button class="dropdown-item btn" (click)="remove(point)">Usuń</button>
+    </div>
   </div>
+</div>
+<div class="row">
+  <button class="btn btn-success col-6">Zaplanuj podróż</button>
+  <button class="btn btn-danger col-6">Wyczyść podróż</button>
 </div>

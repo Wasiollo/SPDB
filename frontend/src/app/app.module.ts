@@ -12,6 +12,8 @@ import {ApiService} from './core/api.service';
 import {ToastrModule} from 'ngx-toastr';
 import {HttpClient, HttpClientModule} from '@angular/common/http';
 import {SearchService} from './search/search.service';
+import {CommonModule} from '@angular/common';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 
 @NgModule({
   declarations: [
@@ -22,7 +24,9 @@ import {SearchService} from './search/search.service';
     HomeComponent
   ],
   imports: [
+    CommonModule,
     BrowserModule,
+    BrowserAnimationsModule,
     HttpClientModule,
     ReactiveFormsModule,
     GoogleMapsModule,

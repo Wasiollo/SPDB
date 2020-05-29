@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
+import {FormBuilder, FormGroup} from '@angular/forms';
 import {SearchService} from './search.service';
 
 @Component({
@@ -10,29 +10,34 @@ import {SearchService} from './search.service';
 export class SearchComponent implements OnInit {
 
   searchForm: FormGroup;
-  locations = [];
-  times = [];
+
+  defaultLocation = {name: 'Wybierz lokalizację', location_id: 0};
+  locations = [this.defaultLocation];
+  defaultTime = {name: 'Wybierz czas', value: 0};
+  times = [this.defaultTime];
 
   constructor(private fb: FormBuilder, private ss: SearchService) {
   }
 
   ngOnInit(): void {
     this.searchForm = this.fb.group({
-      location_id: [],
-      timeValue: ['']
+      location_id: [this.defaultLocation.location_id],
+      timeValue: [this.defaultTime.value]
     });
     this.getLocations();
     this.times = this.getTimes();
   }
 
   getLocations() {
-    this.ss.getPlaces() .subscribe(data => {
+    this.ss.getPlaces().subscribe(data => {
       this.locations = data.result;
+      this.locations.unshift(this.defaultLocation);
     });
   }
 
   getTimes() {
     return [
+      this.defaultTime,
       {value: 0.25, name: '15 minut'},
       {value: 0.5, name: '30 minut'},
       {value: 1, name: '1 godzina'},
@@ -45,6 +50,10 @@ export class SearchComponent implements OnInit {
     addPointData.location = this.locations.find(l => l.location_id === Number(addPointData.location_id));
     addPointData.time = this.times.find(t => t.value === Number(addPointData.timeValue));
     this.ss.addPoint(addPointData);
+    this.searchForm.setValue({
+      location_id: this.defaultLocation.location_id,
+      timeValue: this.defaultTime.value
+    });
   }
 
 }
