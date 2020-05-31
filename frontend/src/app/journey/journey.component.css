@@ -1,0 +1,5 @@
+.journey_list{
+  height: 32rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+}

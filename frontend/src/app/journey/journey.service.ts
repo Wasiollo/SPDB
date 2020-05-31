@@ -15,11 +15,11 @@ export class JourneyService {
   constructor(private apiService: ApiService) {
   }
 
-  journeyPlanned(trip){
+  journeyPlanned(trip) {
     this.tripPlanned.emit(trip);
   }
 
-  pointsCleared(){
+  pointsCleared() {
     this.clearedPoints.emit(true);
   }
 }

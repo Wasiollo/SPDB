@@ -1,6 +1,8 @@
 import {Component, OnInit} from '@angular/core';
 import {FormBuilder, FormGroup} from '@angular/forms';
 import {SearchService} from './search.service';
+import {JourneyService} from '../journey/journey.service';
+import {ToastrService} from 'ngx-toastr';
 
 @Component({
   selector: 'app-search',
@@ -16,7 +18,7 @@ export class SearchComponent implements OnInit {
   defaultTime = {name: 'Wybierz czas', value: 0};
   times = [this.defaultTime];
 
-  constructor(private fb: FormBuilder, private ss: SearchService) {
+  constructor(private fb: FormBuilder, private ss: SearchService, private toastr: ToastrService) {
   }
 
   ngOnInit(): void {
@@ -47,6 +49,10 @@ export class SearchComponent implements OnInit {
 
   submit() {
     const addPointData = this.searchForm.value;
+    if ( Number(addPointData.location_id) === 0 || Number(addPointData.timeValue) === 0) {
+      this.toastr.warning('Musisz wybrać punkt podróży oraz czas w punkcie');
+      return;
+    }
     addPointData.location = this.locations.find(l => l.location_id === Number(addPointData.location_id));
     addPointData.time = this.times.find(t => t.value === Number(addPointData.timeValue));
     this.ss.addPoint(addPointData);
