@@ -17,7 +17,11 @@ export class MapComponent implements OnInit {
   path: google.maps.LatLngLiteral[] =
     [{lat: 25, lng: 26}, {lat: 26, lng: 27}, {lat: 30, lng: 34}];
   polylineOptions:
-    google.maps.PolylineOptions = {path: this.path, strokeColor: 'grey', strokeOpacity: 0.8};
+    google.maps.PolylineOptions = {
+    strokeColor: '#0099ff',
+    strokeOpacity: 0.8,
+    icons: [{icon: {path: google.maps.SymbolPath.FORWARD_OPEN_ARROW}, offset: '50%'}]
+  };
 
   constructor(private ss: SearchService, private js: JourneyService) {
   }
