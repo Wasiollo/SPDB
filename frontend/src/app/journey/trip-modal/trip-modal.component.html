@@ -1,0 +1,59 @@
+<div class="modal-header">
+  <div class="modal-title">
+    <h2>Planowanie podróży</h2>
+  </div>
+  <button type="button" class="close" aria-label="Close" (click)="this.modalRef.dismiss()">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+<div class="modal-body">
+  <div class="col-md-12">
+    <form [formGroup]="tripForm" (ngSubmit)="this.onSubmit()">
+      <div class="form-group">
+        <label class="col-form-label" for="startTime">Godzina początku podróży</label>
+        <select class="custom-select" formControlName="startTimeValue" id="startTime">
+          <option *ngFor="let startTime of times" [value]="startTime.value">
+            {{startTime.name}}
+          </option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="col-form-label" for="endTime">Godzina zakończenia podróży</label>
+        <select class="custom-select" formControlName="endTimeValue" id="endTime">
+          <option *ngFor="let endTime of times" [value]="endTime.value">
+            {{endTime.name}}
+          </option>
+        </select>
+      </div>
+      <ng-container formArrayName="food">
+        <div *ngFor="let _ of tripFood.controls; index as i" class="form-group row">
+          <ng-container [formGroupName]="i">
+            <div class="col-7">
+              <label class="col-form-label" for="foodLocation">Miejsce posiłku</label>
+              <select class="custom-select" formControlName="location_id" id="foodLocation">
+                <option *ngFor="let location of foodLocations" [value]="location.location_id">
+                  {{location.name}}
+                </option>
+              </select>
+            </div>
+            <div class="col-3">
+              <label class="col-form-label" for="foodTimeRange">Czas posiłku</label>
+              <select class="custom-select" formControlName="timeRangeValue" id="foodTimeRange">
+                <option *ngFor="let timeRange of timeRanges" [value]="timeRange.value">
+                  {{timeRange.name}}
+                </option>
+              </select>
+            </div>
+            <div class="col-2">
+              <label class="col-form-label invisible" for="foodTimeRange">Usuń</label>
+              <button type="button" class="btn btn-secondary col-12" (click)="removeFood(i)"><i class="fa fa-trash"></i>
+              </button>
+            </div>
+          </ng-container>
+        </div>
+      </ng-container>
+      <button type="button" class="btn btn-primary col-12 mb-2" (click)="addFood()">Dodaj posiłek</button>
+      <button class="btn btn-success col-md-12" [disabled]="tripForm.invalid">Planuj</button>
+    </form>
+  </div>
+</div>

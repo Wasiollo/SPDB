@@ -2,6 +2,8 @@ import {Component, OnInit} from '@angular/core';
 import {SearchService} from '../search/search.service';
 import {ToastrService} from 'ngx-toastr';
 import {JourneyService} from './journey.service';
+import {TripModalComponent} from './trip-modal/trip-modal.component';
+import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-journey',
@@ -12,7 +14,7 @@ export class JourneyComponent implements OnInit {
 
   points = [];
 
-  constructor(private ss: SearchService, private js: JourneyService, private toastr: ToastrService) {
+  constructor(private ss: SearchService, private js: JourneyService, private toastr: ToastrService, private modalService: NgbModal) {
   }
 
   ngOnInit(): void {
@@ -30,6 +32,11 @@ export class JourneyComponent implements OnInit {
       this.points.push(point);
     });
 
+    this.js.tripPlanning.subscribe(trip => {
+      trip.food.forEach(f => {
+        this.js.addFoodPoint(f);
+      });
+    });
   }
 
   remove(point) {
@@ -43,9 +50,13 @@ export class JourneyComponent implements OnInit {
   }
 
   planTrip() {
-    const trip = [];
-    this.points.forEach(p => trip.push({longitude: p.location.longitude, latitude: p.location.latitude}));
-    this.js.journeyPlanned(trip);
+    if (this.points.length < 2) {
+      this.toastr.warning('Podróż musi mieć przynajmniej dwa punktu');
+      return;
+    }
+    const modalRef = this.modalService.open(TripModalComponent, {size: 'lg'});
+    modalRef.componentInstance.modalRef = modalRef;
+    modalRef.componentInstance.tripPoints = this.points;
   }
 
 }

@@ -11,6 +11,11 @@ export class JourneyService {
 
   @Output() tripPlanned: EventEmitter<any> = new EventEmitter();
   @Output() clearedPoints: EventEmitter<boolean> = new EventEmitter();
+  @Output() tripPlanning: EventEmitter<any> = new EventEmitter();
+  @Output() foodPointAdded: EventEmitter<any> = new EventEmitter();
+
+  foodPlacesUrl = baseUrl + '/foodPlaces';
+  planTripUrl = baseUrl + '/planTrip';
 
   constructor(private apiService: ApiService) {
   }
@@ -21,5 +26,22 @@ export class JourneyService {
 
   pointsCleared() {
     this.clearedPoints.emit(true);
+  }
+
+  getFoodPlaces(): Observable<ApiResponse> {
+    return this.apiService.get(this.foodPlacesUrl);
+  }
+
+  planningTrip(trip) {
+    this.tripPlanning.emit(trip);
+    this.apiService.post(this.planTripUrl, trip).subscribe(data => {
+      this.journeyPlanned(data.result);
+    }, error => {
+      this.journeyPlanned('error');
+    });
+  }
+
+  addFoodPoint(location) {
+    this.foodPointAdded.emit(location);
   }
 }

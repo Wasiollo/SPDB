@@ -1,6 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {SearchService} from '../search/search.service';
 import {JourneyService} from '../journey/journey.service';
+import {ToastrService} from 'ngx-toastr';
 
 @Component({
   selector: 'app-map',
@@ -23,20 +24,28 @@ export class MapComponent implements OnInit {
     icons: [{icon: {path: google.maps.SymbolPath.FORWARD_OPEN_ARROW}, offset: '50%'}]
   };
 
-  constructor(private ss: SearchService, private js: JourneyService) {
+  constructor(private ss: SearchService, private js: JourneyService, private toastr: ToastrService) {
   }
 
   ngOnInit() {
     this.center = {
       lat: 52.2256,
       lng: 21.0030,
-    }; // mniej więcej centru warszawy :)
+    }; // mniej więcej centrum Warszawy :)
     this.ss.addedPoint.subscribe(point => {
       this.points.push(point);
       this.addMarker(point);
     });
 
+    this.js.foodPointAdded.subscribe(foodPoint => {
+      this.points.push(foodPoint);
+      this.addFoodMarker(foodPoint);
+    });
+
     this.js.tripPlanned.subscribe(trip => {
+      if (trip === 'error') {
+        this.toastr.error('Wystąpił błąd podczas planowania trasy');
+      }
       this.path = this.tripToGooglePath(trip);
     });
 
@@ -67,7 +76,23 @@ export class MapComponent implements OnInit {
       },
       title: point.location.name,
       // options: {animation: google.maps.Animation.BOUNCE}
-      options: {}
+      options: {icon: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png?raw=true'}
+    });
+  }
+
+  addFoodMarker(foodPoint) {
+    this.markers.push({
+      position: {
+        lat: foodPoint.location.latitude,
+        lng: foodPoint.location.longitude,
+      },
+      label: {
+        color: 'red',
+        // text: point.location.name,
+        text: ' ',
+      },
+      title: foodPoint.location.name,
+      options: {icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png?raw=true'}
     });
   }
 

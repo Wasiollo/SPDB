@@ -1,7 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {FormBuilder, FormGroup} from '@angular/forms';
 import {SearchService} from './search.service';
-import {JourneyService} from '../journey/journey.service';
 import {ToastrService} from 'ngx-toastr';
 
 @Component({
@@ -33,6 +32,9 @@ export class SearchComponent implements OnInit {
   getLocations() {
     this.ss.getPlaces().subscribe(data => {
       this.locations = data.result;
+      this.locations.unshift(this.defaultLocation);
+    }, error => {
+      this.toastr.error('Wystąpił błąd poczas pobierania lokalizacji');
       this.locations.unshift(this.defaultLocation);
     });
   }

@@ -15,6 +15,8 @@ import {SearchService} from './search/search.service';
 import {CommonModule} from '@angular/common';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {JourneyService} from './journey/journey.service';
+import { TripModalComponent } from './journey/trip-modal/trip-modal.component';
+import {NgxLoadingModule} from 'ngx-loading';
 
 @NgModule({
   declarations: [
@@ -22,7 +24,8 @@ import {JourneyService} from './journey/journey.service';
     SearchComponent,
     JourneyComponent,
     MapComponent,
-    HomeComponent
+    HomeComponent,
+    TripModalComponent
   ],
   imports: [
     CommonModule,
@@ -32,6 +35,7 @@ import {JourneyService} from './journey/journey.service';
     ReactiveFormsModule,
     GoogleMapsModule,
     ToastrModule.forRoot(),
+    NgxLoadingModule.forRoot({})
   ],
   providers: [ApiService, SearchService, JourneyService],
   bootstrap: [AppComponent]
