@@ -96,4 +96,85 @@ export class MapComponent implements OnInit {
     });
   }
 
+  sendPlanTrip() {
+    const trip = {
+      startTimeValue: '7',
+      endTimeValue: '22.5',
+      food: [
+        {
+          location_id: '57',
+          timeRangeValue: '12.75',
+          location: {
+            location_id: 57,
+            name: 'Zapiecek',
+            latitude: 52.2490308582234,
+            longitude: 21.0118160056148,
+            location_type: 'food'
+          }
+        },
+        {
+          location_id: '52',
+          timeRangeValue: '14.5',
+          location: {
+            location_id: 52,
+            name: 'El Greco',
+            latitude: 52.2362039383592,
+            longitude: 20.9990327607283,
+            location_type: 'food'
+          }
+        }
+      ],
+      tripPoints: [
+        {
+          location_id: '2',
+          timeValue: '0.5',
+          location: {
+            location_id: 2,
+            name: 'Zamek Królewski',
+            latitude: 52.24788875,
+            longitude: 21.0152806772873,
+            location_type: 'trip',
+            short_name: 'Zamek Królewski'
+          },
+          time: {
+            value: 0.5,
+            name: '30 minut'
+          }
+        },
+        {
+          location_id: '1',
+          timeValue: '0.25',
+          location: {
+            location_id: 1,
+            name: 'Pałac Kultury i Nauki',
+            latitude: 52.2317641,
+            longitude: 21.0057996756161,
+            location_type: 'trip',
+            short_name: 'Pałac Kultury i Nauki'
+          },
+          time: {
+            value: 0.25,
+            name: '15 minut'
+          }
+        },
+        {
+          location_id: '15',
+          timeValue: '0.5',
+          location: {
+            location_id: 15,
+            name: 'Tor wyścigów konnych Służewiec',
+            latitude: 52.16204529136,
+            longitude: 21.0110608662305,
+            location_type: 'trip',
+            short_name: 'Tor wyścigów konnych Sł...'
+          },
+          time: {
+            value: 0.5,
+            name: '30 minut'
+          }
+        }
+      ]
+    };
+    this.js.planningTrip(trip);
+  }
 }
