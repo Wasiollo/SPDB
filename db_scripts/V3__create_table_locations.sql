@@ -1,5 +1,6 @@
 create type spdb.location_t as enum('food', 'trip');
 
+-- DROP TABLE spdb.locations;
 CREATE TABLE spdb.locations (
     location_id serial primary key,
     name VARCHAR(255),
