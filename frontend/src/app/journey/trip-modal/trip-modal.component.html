@@ -25,6 +25,15 @@
           </option>
         </select>
       </div>
+      <div class="form-group">
+        <label class="col-form-label" for="endTime">Środek transportu</label>
+        <select class="custom-select" formControlName="vehicle" id="vehicle">
+          <option *ngFor="let vehicle of vehicleList" [value]="vehicle.value">
+            {{vehicle.name}}
+          </option>
+        </select>
+      </div>
+
       <ng-container formArrayName="food">
         <div *ngFor="let _ of tripFood.controls; index as i" class="form-group row">
           <ng-container [formGroupName]="i">

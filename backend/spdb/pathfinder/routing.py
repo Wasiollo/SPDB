@@ -25,6 +25,16 @@ class VehicleRouting:
 
     def prepare_location_data(self, food_locations, trip_locations, t_times):
         locations = []
+
+        for trip_location in trip_locations:
+            location = {
+                'location_id': trip_location.get('location_id'),
+                'start_time': float(trip_location.get('location').get('start_time')) * MULTIPLIER,
+                'end_time': float(trip_location.get('location').get('end_time')) * MULTIPLIER,
+                'time_value': float(trip_location.get('timeValue')) * MULTIPLIER
+            }
+            locations.append(location)
+
         for food_location in food_locations:
             location = {
                 'location_id': food_location.get('location_id'),
@@ -33,15 +43,6 @@ class VehicleRouting:
                 'end_time': min(float(food_location.get('timeRangeValue')) + 1,
                                 float(food_location.get('location').get('end_time'))) * MULTIPLIER,
                 'time_value': float(food_location.get('timeValue')) * MULTIPLIER
-            }
-            locations.append(location)
-
-        for trip_location in trip_locations:
-            location = {
-                'location_id': trip_location.get('location_id'),
-                'start_time': float(trip_location.get('location').get('start_time')) * MULTIPLIER,
-                'end_time': float(trip_location.get('location').get('end_time')) * MULTIPLIER,
-                'time_value': float(trip_location.get('timeValue'))
             }
             locations.append(location)
 
@@ -168,4 +169,5 @@ class VehicleRouting:
         # Print solution on console.
         if solution:
             result = self.print_solution(data, manager, routing, solution)
-            print(result)
+            result['location_points'] = self.location_points
+            return result

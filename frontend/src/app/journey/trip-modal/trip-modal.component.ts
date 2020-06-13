@@ -20,6 +20,8 @@ export class TripModalComponent implements OnInit {
   times = [this.defaultTime];
   foodLocations = [this.defaultFoodLocation];
   timeRanges = [this.defaultTimeRange];
+  defaultVehicle = {name: 'Wszystkie (pieszo, rowerem, samochodem)', value: 'all'};
+  vehicleList = [this.defaultVehicle, {name: 'Pieszo', value: 'foot'}, {name: 'Rowerem', value: 'bike'}, {name: 'Samochodem', value: 'car'}];
 
   constructor(private formBuilder: FormBuilder, private js: JourneyService, private toastr: ToastrService) {
   }
@@ -36,6 +38,7 @@ export class TripModalComponent implements OnInit {
       {
         startTimeValue: [this.defaultTime.value],
         endTimeValue: [this.defaultTime.value],
+        vehicle: [this.defaultVehicle.value],
         food: new FormArray([])
       }
     );
@@ -109,6 +112,7 @@ export class TripModalComponent implements OnInit {
     const trip = this.tripForm.value;
     trip.tripPoints = this.tripPoints;
     for (const f of trip.food) {
+      f.timeValue = 0.5;
       if (Number(f.timeRangeValue) === 0) {
         this.toastr.warning('Musisz wybrać czas wszystkich posiłków');
         return;
