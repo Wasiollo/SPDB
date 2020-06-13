@@ -98,79 +98,92 @@ export class MapComponent implements OnInit {
 
   sendPlanTrip() {
     const trip = {
-      startTimeValue: '7',
-      endTimeValue: '22.5',
-      food: [
+      "startTimeValue":"7",
+      "endTimeValue":"20.5",
+      "vehicle":"all",
+      "food":[
         {
-          location_id: '57',
-          timeRangeValue: '12.75',
-          location: {
-            location_id: 57,
-            name: 'Zapiecek',
-            latitude: 52.2490308582234,
-            longitude: 21.0118160056148,
-            location_type: 'food'
+          "location_id":"38",
+          "timeRangeValue":"12.5",
+          "timeValue":0.5,
+          "location":{
+            "location_id":38,
+            "name":"Bar Żuczek",
+            "latitude":52.2542727895232,
+            "longitude":21.0244546789365,
+            "location_type":"food",
+            "start_time":12,
+            "end_time":21
           }
         },
         {
-          location_id: '52',
-          timeRangeValue: '14.5',
-          location: {
-            location_id: 52,
-            name: 'El Greco',
-            latitude: 52.2362039383592,
-            longitude: 20.9990327607283,
-            location_type: 'food'
+          "location_id":"45",
+          "timeRangeValue":"16.75",
+          "timeValue":0.5,
+          "location":{
+            "location_id":45,
+            "name":"Bastylia",
+            "latitude":52.2193737019842,
+            "longitude":21.0173682786144,
+            "location_type":"food",
+            "start_time":10,
+            "end_time":22
           }
         }
       ],
-      tripPoints: [
+      "tripPoints":[
         {
-          location_id: '2',
-          timeValue: '0.5',
-          location: {
-            location_id: 2,
-            name: 'Zamek Królewski',
-            latitude: 52.24788875,
-            longitude: 21.0152806772873,
-            location_type: 'trip',
-            short_name: 'Zamek Królewski'
+          "location_id":"10",
+          "timeValue":"1",
+          "location":{
+            "location_id":10,
+            "name":"Pole Mokotowskie",
+            "latitude":52.2117519253995,
+            "longitude":20.9997575445816,
+            "location_type":"trip",
+            "start_time":10,
+            "end_time":17,
+            "short_name":"Pole Mokotowskie"
           },
-          time: {
-            value: 0.5,
-            name: '30 minut'
+          "time":{
+            "value":1,
+            "name":"1 godzina"
           }
         },
         {
-          location_id: '1',
-          timeValue: '0.25',
-          location: {
-            location_id: 1,
-            name: 'Pałac Kultury i Nauki',
-            latitude: 52.2317641,
-            longitude: 21.0057996756161,
-            location_type: 'trip',
-            short_name: 'Pałac Kultury i Nauki'
+          "location_id":"1",
+          "timeValue":"2",
+          "location":{
+            "location_id":1,
+            "name":"Pałac Kultury i Nauki",
+            "latitude":52.225665764,
+            "longitude":21.003833318,
+            "location_type":"trip",
+            "start_time":9,
+            "end_time":18,
+            "short_name":"Pałac Kultury i Nauki"
           },
-          time: {
-            value: 0.25,
-            name: '15 minut'
+          "time":{
+            "value":2,
+            "name":"2 godziny"
           }
         },
         {
-          location_id: '15',
-          timeValue: '0.5',
-          location: {
-            location_id: 15,
-            name: 'Tor wyścigów konnych Służewiec',
-            latitude: 52.16204529136,
-            longitude: 21.0110608662305,
-            location_type: 'trip',
-            short_name: 'Tor wyścigów konnych Sł...'
+          "location_id":"14",
+          "timeValue":"0.5",
+          "location":{
+            "location_id":14,
+            "name":"ZOO Warszawskie",
+            "latitude":52.254399,
+            "longitude":21.024012,
+            "location_type":"trip",
+            "start_time":10,
+            "end_time":16,
+            "short_name":"ZOO Warszawskie"
           },
-          time: {
-            value: 0.5,
-            name: '30 minut'
+          "time":{
+            "value":0.5,
+            "name":"30 minut"
           }
         }
       ]

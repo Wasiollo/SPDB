@@ -1,0 +1,4 @@
+CREATE INDEX locations_distances_start
+ON spdb.locations_distances(start_location_id);
+CREATE INDEX locations_distances_end
+ON spdb.locations_distances(end_location_id);
