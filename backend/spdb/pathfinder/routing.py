@@ -20,29 +20,45 @@ class VehicleRouting:
         self.end_time = e_time
         self.food_locations = f_locations
         self.trip_locations = t_locations
-        self.location_points = self.prepare_location_data(self.food_locations, self.trip_locations, t_times)
-        self.travel_times = t_times
+        self.location_points = self.prepare_location_data(self.food_locations, self.trip_locations)
+        self.travel_times = self.prepare_travel_times(self.location_points, t_times)
 
-    def prepare_location_data(self, food_locations, trip_locations, t_times):
+    def prepare_travel_times(self, location_points, t_times):
+        travel_times = []
+        for idx, travel in enumerate(t_times):
+            travel_items = travel.get('items')
+            time_value = location_points[idx].get('time_value')
+            modified_travel_items = [float(x) + time_value for x in travel_items] # entended with time needed to stay
+            print(travel_items)
+            print(location_points[idx])
+            print(modified_travel_items)
+            travel_times.append(modified_travel_items)
+        return travel_times
+
+
+
+    def prepare_location_data(self, food_locations, trip_locations):
         locations = []
 
         for trip_location in trip_locations:
+            location_time_value = float(trip_location.get('timeValue')) * MULTIPLIER
             location = {
                 'location_id': trip_location.get('location_id'),
+                'time_value': location_time_value,
                 'start_time': float(trip_location.get('location').get('start_time')) * MULTIPLIER,
-                'end_time': float(trip_location.get('location').get('end_time')) * MULTIPLIER,
-                'time_value': float(trip_location.get('timeValue')) * MULTIPLIER
+                'end_time': float(trip_location.get('location').get('end_time')) * MULTIPLIER - location_time_value
             }
             locations.append(location)
 
         for food_location in food_locations:
+            location_time_value = float(food_location.get('timeValue')) * MULTIPLIER
             location = {
                 'location_id': food_location.get('location_id'),
+                'time_value': location_time_value,
                 'start_time': max(float(food_location.get('timeRangeValue')),
                                   float(food_location.get('location').get('start_time'))) * MULTIPLIER,
                 'end_time': min(float(food_location.get('timeRangeValue')) + 1,
-                                float(food_location.get('location').get('end_time'))) * MULTIPLIER,
-                'time_value': float(food_location.get('timeValue')) * MULTIPLIER
+                                float(food_location.get('location').get('end_time'))) * MULTIPLIER - location_time_value
             }
             locations.append(location)
 
@@ -54,7 +70,7 @@ class VehicleRouting:
         data = {}
         data['time_matrix'] = []
         for travel in self.travel_times:
-            data['time_matrix'].append(travel.get('items'))
+            data['time_matrix'].append(travel)
 
         data['time_windows'] = []
 

@@ -84,8 +84,7 @@ def plan_trip(request, format=None):
 
     groups = itertools.groupby(trip_times, lambda x: x.get('start_location_id'))
 
-    # TODO remove * 3600
-    trip_times_grouped = [{'start_location_id': k, 'items': [x.get('route_time') * 3600 for x in v]} for k, v in groups]
+    trip_times_grouped = [{'start_location_id': k, 'items': [x.get('route_time') * MULTIPLIER for x in v]} for k, v in groups]
     print(trip_times_grouped)
 
     routing = VehicleRouting(start_time, end_time, trip_points_data, food_data, trip_times_grouped)
