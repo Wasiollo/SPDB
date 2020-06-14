@@ -20,8 +20,15 @@ export class TripModalComponent implements OnInit {
   times = [this.defaultTime];
   foodLocations = [this.defaultFoodLocation];
   timeRanges = [this.defaultTimeRange];
+  defaultStartPoint: any;
+  startPoints = [];
   defaultVehicle = {name: 'Wszystkie (pieszo, rowerem, samochodem)', value: 'all'};
-  vehicleList = [this.defaultVehicle, {name: 'Pieszo', value: 'foot'}, {name: 'Rowerem', value: 'bike'}, {name: 'Samochodem', value: 'car'}];
+  vehicleList = [
+    this.defaultVehicle,
+    {name: 'Pieszo', value: 'foot'},
+    {name: 'Rowerem', value: 'bike'},
+    {name: 'Samochodem', value: 'car'}
+  ];
 
   constructor(private formBuilder: FormBuilder, private js: JourneyService, private toastr: ToastrService) {
   }
@@ -30,6 +37,7 @@ export class TripModalComponent implements OnInit {
     this.times = this.getTimes();
     this.timeRanges = this.getTimeRanges();
     this.getFoodLocations();
+    this.getDefaultStartPoint();
     this.buildTripForm();
   }
 
@@ -39,6 +47,7 @@ export class TripModalComponent implements OnInit {
         startTimeValue: [this.defaultTime.value],
         endTimeValue: [this.defaultTime.value],
         vehicle: [this.defaultVehicle.value],
+        startPoint: [this.defaultStartPoint],
         food: new FormArray([])
       }
     );
@@ -97,6 +106,19 @@ export class TripModalComponent implements OnInit {
     });
   }
 
+  private getDefaultStartPoint() {
+    this.js.getDefaultTripPoint().subscribe(data => {
+      this.defaultStartPoint = data.result[0];
+      this.defaultStartPoint.short_name = 'Start';
+      if (!this.tripPoints.find(tp => Number(tp.location_id) === 0)) {
+        this.startPoints.push(this.defaultStartPoint);
+      }
+      this.tripPoints.forEach(p => this.startPoints.push(p.location));
+    }, error => {
+      this.toastr.error('Wystąpił błąd podczas pobierania lokalizacji startowej');
+    });
+  }
+
   onSubmit() {
     const tripRequirements = this.tripForm.value;
     if (Number(tripRequirements.startTimeValue) === 0 || Number(tripRequirements.endTimeValue) === 0) {
@@ -111,6 +133,23 @@ export class TripModalComponent implements OnInit {
 
     const trip = this.tripForm.value;
     trip.tripPoints = this.tripPoints;
+    const startTripPoint = {
+      location_id: '0',
+      timeValue: '0',
+      location: this.defaultStartPoint,
+      time: {value: 0, name: ''}
+    };
+    if (Number(trip.startPoint) === 0) {
+      if (Number(trip.tripPoints[0].location_id) !== 0) {
+        trip.tripPoints.unshift(startTripPoint);
+        this.js.addStartTripPoint(startTripPoint);
+      }
+    } else {
+      if (Number(trip.tripPoints[0].location_id) === 0) {
+        trip.tripPoints.shift();
+        this.js.removeStartTripPoint();
+      }
+    }
     for (const f of trip.food) {
       f.timeValue = 0.5;
       if (Number(f.timeRangeValue) === 0) {

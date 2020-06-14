@@ -46,6 +46,24 @@ export class MapComponent implements OnInit {
       this.addFoodMarker(foodPoint);
     });
 
+    this.js.startTripPointAdded.subscribe(startTripPoint => {
+      this.points.push(startTripPoint);
+      this.addStartPointMarker(startTripPoint);
+    });
+
+    this.js.startPointRemoved.subscribe(removed => {
+      if (removed){
+        this.points = this.points.filter( p => Number(p.location_id) !== 0);
+        this.markers = this.markers.filter(m => Number(m.locationId) !== 0);
+      }
+    });
+
+    this.js.foodPointsRemoved.subscribe(removed => {
+      if (removed) {
+        this.markers = this.markers.filter(m => m.type !== 'food');
+      }
+    });
+
     this.js.tripPlanned.subscribe(trip => {
       if (trip === 'error') {
         this.toastr.error('Wystąpił błąd podczas planowania trasy');
@@ -96,7 +114,9 @@ export class MapComponent implements OnInit {
       },
       title: point.location.name + ' - (' + point.location.start_time + ', ' + point.location.end_time + ')',
       // options: {animation: google.maps.Animation.BOUNCE}
-      options: {icon: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png?raw=true'}
+      options: {icon: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png?raw=true'},
+      locationId: point.location_id,
+      type: 'trip'
     });
   }
 
@@ -112,102 +132,26 @@ export class MapComponent implements OnInit {
         text: ' ',
       },
       title: foodPoint.location.name + ' - (' + foodPoint.location.start_time + ', ' + foodPoint.location.end_time + ')',
-      options: {icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png?raw=true'}
+      options: {icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png?raw=true'},
+      locationId: foodPoint.location_id,
+      type: 'food'
     });
   }
-
-  sendPlanTrip() {
-    const trip = {
-      startTimeValue: '7',
-      endTimeValue: '20.5',
-      vehicle: 'car',
-      food: [
-        {
-          location_id: '38',
-          timeRangeValue: '12.5',
-          timeValue: 0.5,
-          location: {
-            location_id: 38,
-            name: 'Bar Żuczek',
-            latitude: 52.2542727895232,
-            longitude: 21.0244546789365,
-            location_type: 'food',
-            start_time: 12,
-            end_time: 21
-          }
-        },
-        {
-          location_id: '45',
-          timeRangeValue: '16.75',
-          timeValue: 0.5,
-          location: {
-            location_id: 45,
-            name: 'Bastylia',
-            latitude: 52.2193737019842,
-            longitude: 21.0173682786144,
-            location_type: 'food',
-            start_time: 10,
-            end_time: 22
-          }
-        }
-      ],
-      tripPoints: [
-        {
-          location_id: '10',
-          timeValue: '1',
-          location: {
-            location_id: 10,
-            name: 'Pole Mokotowskie',
-            latitude: 52.2117519253995,
-            longitude: 20.9997575445816,
-            location_type: 'trip',
-            start_time: 10,
-            end_time: 17,
-            short_name: 'Pole Mokotowskie'
-          },
-          time: {
-            value: 1,
-            name: '1 godzina'
-          }
-        },
-        {
-          location_id: '1',
-          timeValue: '2',
-          location: {
-            location_id: 1,
-            name: 'Pałac Kultury i Nauki',
-            latitude: 52.225665764,
-            longitude: 21.003833318,
-            location_type: 'trip',
-            start_time: 9,
-            end_time: 18,
-            short_name: 'Pałac Kultury i Nauki'
-          },
-          time: {
-            value: 2,
-            name: '2 godziny'
-          }
-        },
-        {
-          location_id: '14',
-          timeValue: '0.5',
-          location: {
-            location_id: 14,
-            name: 'ZOO Warszawskie',
-            latitude: 52.254399,
-            longitude: 21.024012,
-            location_type: 'trip',
-            start_time: 10,
-            end_time: 16,
-            short_name: 'ZOO Warszawskie'
-          },
-          time: {
-            value: 0.5,
-            name: '30 minut'
-          }
-        }
-      ]
-    };
-    this.js.planningTrip(trip);
+  addStartPointMarker(startTripPoint) {
+    this.markers.push({
+      position: {
+        lat: startTripPoint.location.latitude,
+        lng: startTripPoint.location.longitude,
+      },
+      label: {
+        color: 'red',
+        // text: point.location.name,
+        text: ' ',
+      },
+      title: startTripPoint.location.name + ' - (' + startTripPoint.location.start_time + ', ' + startTripPoint.location.end_time + ')',
+      options: {icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png?raw=true'},
+      locationId: 0,
+      type: 'start'
+    });
   }
 }

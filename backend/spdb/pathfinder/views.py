@@ -37,6 +37,15 @@ class FoodPlacesView(APIView):
 
         return Response(row)
 
+
+class StartPointView(APIView):
+    def get(self, request, format=None):
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * from locations l WHERE l.location_id = 0 ;")
+            row = fetch_data_as_dict(cursor)
+
+        return Response(row)
+
 # SELECT ld.start_location_id, ld.end_location_id, all_time
 # FROM spdb.locations_distances ld
 # WHERE ld.start_location_id IN (1, 2, 3, 13, 19, 30)
@@ -53,6 +62,8 @@ def plan_trip(request, format=None):
     print("End time: " + end_time)
     vehicle = request.data.get("vehicle")
     print("Vehicle: " + vehicle)
+    start_point = request.data.get("startPoint")
+    print("Start point: " + start_point)
     food_data = request.data.get('food')
     food_data = sorted(food_data, key=lambda k: k['location_id'])
     trip_points_data = request.data.get('tripPoints')
@@ -66,6 +77,11 @@ def plan_trip(request, format=None):
         points.append(food)
     for trip_point in trip_points_data:
         points.append(trip_point)
+
+    points = sorted(points, key=lambda k: k['location_id'])
+
+    depot = points.index(list(filter(lambda location: location['location_id'] == start_point, points))[0])
+    print("Depot: " + str(depot))
 
     with connection.cursor() as cursor:
         cursor.execute(
@@ -87,8 +103,12 @@ def plan_trip(request, format=None):
     trip_times_grouped = [{'start_location_id': k, 'items': [x.get('route_time') * MULTIPLIER for x in v]} for k, v in groups]
     print(trip_times_grouped)
 
-    routing = VehicleRouting(start_time, end_time, trip_points_data, food_data, trip_times_grouped)
-    routing_result = routing.solve()
+    vehicle_num = 0
+    routing_result = None
+    while routing_result is None:
+        vehicle_num += 1
+        routing = VehicleRouting(start_time, end_time, trip_points_data, food_data, trip_times_grouped, depot, vehicle_num)
+        routing_result = routing.solve()
 
     print(routing_result)
 

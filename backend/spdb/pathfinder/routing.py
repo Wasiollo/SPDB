@@ -14,17 +14,57 @@ class VehicleRouting:
     food_locations = []
     trip_locations = []
     travel_times = []
+    vehicle_num = 1
+    depot = 0
 
-    def __init__(self, s_time, e_time, t_locations, f_locations, t_times):
+    def __init__(self, s_time, e_time, t_locations, f_locations, t_times, depot_num, v_num):
         self.start_time = s_time
         self.end_time = e_time
         self.food_locations = f_locations
         self.trip_locations = t_locations
+        self.vehicle_num = v_num
+        self.depot = depot_num
         self.location_points = self.prepare_location_data(self.food_locations, self.trip_locations)
         self.travel_times = self.prepare_travel_times(self.location_points, t_times)
 
     def prepare_travel_times(self, location_points, t_times):
         travel_times = []
+        all_points = []
+
+        for trip_point in self.trip_locations:
+            all_points.append(trip_point)
+        for food in self.food_locations:
+            all_points.append(food)
+
+        location_points_ids = []
+        for l_p in location_points:
+            location_points_ids.append(l_p.get('location_id'))
+
+        filter_result = list(filter(lambda location: location['location_id'] not in location_points_ids, all_points))
+        filter_result_ids = []
+        for fr in filter_result:
+            filter_result_ids.append(fr.get('location_id'))
+        print('FILTER RESULT_IDS: ')
+        print(filter_result_ids)
+        print('FILTER RESULT_IDS END')
+
+        idxs_to_remove = []
+        for idx, point in enumerate(all_points):
+            if point.get('location_id') in filter_result_ids:
+                idxs_to_remove.append(idx)
+
+        original_depot = self.depot
+
+        for t in t_times:
+            for idx in reversed(idxs_to_remove):
+                t.get('items').pop(idx)
+        for idx in reversed(idxs_to_remove):
+            t_times.pop(idx)
+            if idx < original_depot:
+                self.depot -= 1
+            if idx == original_depot:
+                self.depot = 0
+
         for idx, travel in enumerate(t_times):
             travel_items = travel.get('items')
             time_value = location_points[idx].get('time_value')
@@ -35,8 +75,6 @@ class VehicleRouting:
             travel_times.append(modified_travel_items)
         return travel_times
 
-
-
     def prepare_location_data(self, food_locations, trip_locations):
         locations = []
 
@@ -45,23 +83,31 @@ class VehicleRouting:
             location = {
                 'location_id': trip_location.get('location_id'),
                 'time_value': location_time_value,
-                'start_time': float(trip_location.get('location').get('start_time')) * MULTIPLIER,
-                'end_time': float(trip_location.get('location').get('end_time')) * MULTIPLIER - location_time_value
+                'start_time': max(float(self.start_time), float(trip_location.get('location').get('start_time'))) * MULTIPLIER,
+                'end_time': min(float(self.end_time), float(trip_location.get('location').get('end_time'))) * MULTIPLIER - location_time_value
             }
-            locations.append(location)
+            if location.get('end_time') > location.get('start_time'):
+                locations.append(location)
+            else:
+                print(location)
 
         for food_location in food_locations:
             location_time_value = float(food_location.get('timeValue')) * MULTIPLIER
             location = {
                 'location_id': food_location.get('location_id'),
                 'time_value': location_time_value,
-                'start_time': max(float(food_location.get('timeRangeValue')),
+                'start_time': max(float(self.start_time), float(food_location.get('timeRangeValue')),
                                   float(food_location.get('location').get('start_time'))) * MULTIPLIER,
-                'end_time': min(float(food_location.get('timeRangeValue')) + 1,
+                'end_time': min(float(self.end_time), float(food_location.get('timeRangeValue')) + 1,
                                 float(food_location.get('location').get('end_time'))) * MULTIPLIER - location_time_value
             }
-            locations.append(location)
-
+            if location.get('end_time') > location.get('start_time'):
+                locations.append(location)
+            else:
+                print(location)
+        print('Locations: ')
+        print(locations)
+        print('Locations END')
         return locations
 
     @property
@@ -80,8 +126,8 @@ class VehicleRouting:
                 [int(location.get('start_time')), int(location.get('end_time'))]
             )
 
-        data['num_vehicles'] = 1
-        data['depot'] = 0
+        data['num_vehicles'] = self.vehicle_num
+        data['depot'] = self.depot
         print(data)
         return data
 
@@ -99,15 +145,15 @@ class VehicleRouting:
             while not routing.IsEnd(index):
                 time_var = time_dimension.CumulVar(index)
                 plan_output += '{0} Time({1},{2}) -> '.format(
-                    manager.IndexToNode(index), solution.Min(time_var) / MULTIPLIER,
-                    solution.Max(time_var) / MULTIPLIER)
+                    manager.IndexToNode(index), solution.Min(time_var) ,
+                    solution.Max(time_var))
                 result['trip'].append({'point': manager.IndexToNode(index), 'min_time': solution.Min(time_var),
                     'max_time': solution.Max(time_var)})
                 index = solution.Value(routing.NextVar(index))
             time_var = time_dimension.CumulVar(index)
             plan_output += '{0} Time({1},{2})\n'.format(manager.IndexToNode(index),
-                                                        solution.Min(time_var) / MULTIPLIER,
-                                                        solution.Max(time_var) / MULTIPLIER)
+                                                        solution.Min(time_var),
+                                                        solution.Max(time_var))
             result['trip'].append({'point': manager.IndexToNode(index), 'min_time': solution.Min(time_var),
                                    'max_time': solution.Max(time_var)})
             result['time'] = solution.Min(time_var) - result['trip'][0].get('min_time')
@@ -115,9 +161,13 @@ class VehicleRouting:
                 solution.Min(time_var))
             print(plan_output)
             total_time += solution.Min(time_var)
+            results.append(result)
+        print('Routed')
         print('Total time of all routes: {}min'.format(total_time))
-        print(result)
-        return result
+        final_result = sorted(results, key=lambda k: len(k['trip']))[-1]
+        print(results)
+
+        return final_result
 
     def solve(self):
         """Solve the VRP with time windows."""
@@ -148,7 +198,7 @@ class VehicleRouting:
         time = 'Time'
         routing.AddDimension(
             transit_callback_index,
-            MULTIPLIER,  # allow waiting time
+            9999999,  # allow waiting time
             9999999,  # maximum time per vehicle
             False,  # Don't force start cumul to zero.
             time)
