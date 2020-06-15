@@ -16,7 +16,7 @@ export class TripModalComponent implements OnInit {
   tripForm: FormGroup;
   defaultTime = {name: 'Wybierz czas', value: 0};
   defaultTimeRange = {name: 'Wybierz czas', value: 0};
-  defaultFoodLocation = {name: 'Dowolna restauracja', location_id: 0};
+  defaultFoodLocation = {name: 'Wybierz restaurację', location_id: 0};
   times = [this.defaultTime];
   foodLocations = [this.defaultFoodLocation];
   timeRanges = [this.defaultTimeRange];
@@ -139,6 +139,12 @@ export class TripModalComponent implements OnInit {
       location: this.defaultStartPoint,
       time: {value: 0, name: ''}
     };
+
+    if (trip.startPoint === null || trip.startPoint === undefined) {
+      this.toastr.warning('Musisz wybrać punkt początkowy');
+      return;
+    }
+
     if (Number(trip.startPoint) === 0) {
       if (Number(trip.tripPoints[0].location_id) !== 0) {
         trip.tripPoints.unshift(startTripPoint);
@@ -152,6 +158,10 @@ export class TripModalComponent implements OnInit {
     }
     for (const f of trip.food) {
       f.timeValue = 0.5;
+      if (Number(f.location_id) === 0){
+        this.toastr.warning('Musisz wybrać restaurację');
+        return;
+      }
       if (Number(f.timeRangeValue) === 0) {
         this.toastr.warning('Musisz wybrać czas wszystkich posiłków');
         return;
@@ -166,7 +176,6 @@ export class TripModalComponent implements OnInit {
       }
       f.location = this.foodLocations.find(fl => Number(fl.location_id) === Number(f.location_id));
     }
-
     const foodTimesArray = [];
     trip.food.forEach(f => foodTimesArray.push(f.timeRangeValue));
     foodTimesArray.sort();
