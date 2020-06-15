@@ -195,11 +195,13 @@ class VehicleRouting:
         routing.SetArcCostEvaluatorOfAllVehicles(transit_callback_index)
 
         # Add Time Windows constraint.
+        time_per_vehicle = int(float(self.end_time) * MULTIPLIER)
+        print(time_per_vehicle)
         time = 'Time'
         routing.AddDimension(
             transit_callback_index,
-            9999999,  # allow waiting time
-            9999999,  # maximum time per vehicle
+            900,  # allow waiting time
+            time_per_vehicle,  # maximum time per vehicle
             False,  # Don't force start cumul to zero.
             time)
         time_dimension = routing.GetDimensionOrDie(time)
