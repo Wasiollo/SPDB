@@ -44,9 +44,6 @@ class VehicleRouting:
         filter_result_ids = []
         for fr in filter_result:
             filter_result_ids.append(fr.get('location_id'))
-        print('FILTER RESULT_IDS: ')
-        print(filter_result_ids)
-        print('FILTER RESULT_IDS END')
 
         idxs_to_remove = []
         for idx, point in enumerate(all_points):
@@ -68,10 +65,7 @@ class VehicleRouting:
         for idx, travel in enumerate(t_times):
             travel_items = travel.get('items')
             time_value = location_points[idx].get('time_value')
-            modified_travel_items = [float(x) + time_value for x in travel_items] # entended with time needed to stay
-            print(travel_items)
-            print(location_points[idx])
-            print(modified_travel_items)
+            modified_travel_items = [float(x) + time_value for x in travel_items]  # entended with time needed to stay
             travel_times.append(modified_travel_items)
         return travel_times
 
@@ -83,13 +77,13 @@ class VehicleRouting:
             location = {
                 'location_id': trip_location.get('location_id'),
                 'time_value': location_time_value,
-                'start_time': max(float(self.start_time), float(trip_location.get('location').get('start_time'))) * MULTIPLIER,
-                'end_time': min(float(self.end_time), float(trip_location.get('location').get('end_time'))) * MULTIPLIER - location_time_value
+                'start_time': max(float(self.start_time),
+                                  float(trip_location.get('location').get('start_time'))) * MULTIPLIER,
+                'end_time': min(float(self.end_time),
+                                float(trip_location.get('location').get('end_time'))) * MULTIPLIER - location_time_value
             }
             if location.get('end_time') > location.get('start_time'):
                 locations.append(location)
-            else:
-                print(location)
 
         for food_location in food_locations:
             location_time_value = float(food_location.get('timeValue')) * MULTIPLIER
@@ -103,11 +97,7 @@ class VehicleRouting:
             }
             if location.get('end_time') > location.get('start_time'):
                 locations.append(location)
-            else:
-                print(location)
-        print('Locations: ')
-        print(locations)
-        print('Locations END')
+
         return locations
 
     @property
@@ -121,17 +111,15 @@ class VehicleRouting:
         data['time_windows'] = []
 
         for location in self.location_points:
-            print(location)
             data['time_windows'].append(
                 [int(location.get('start_time')), int(location.get('end_time'))]
             )
 
         data['num_vehicles'] = self.vehicle_num
         data['depot'] = self.depot
-        print(data)
         return data
 
-    def print_solution(self, data, manager, routing, solution):
+    def prepare_solution(self, data, manager, routing, solution):
         """Prints solution on console."""
         time_dimension = routing.GetDimensionOrDie('Time')
         total_time = 0
@@ -145,10 +133,10 @@ class VehicleRouting:
             while not routing.IsEnd(index):
                 time_var = time_dimension.CumulVar(index)
                 plan_output += '{0} Time({1},{2}) -> '.format(
-                    manager.IndexToNode(index), solution.Min(time_var) ,
+                    manager.IndexToNode(index), solution.Min(time_var),
                     solution.Max(time_var))
                 result['trip'].append({'point': manager.IndexToNode(index), 'min_time': solution.Min(time_var),
-                    'max_time': solution.Max(time_var)})
+                                       'max_time': solution.Max(time_var)})
                 index = solution.Value(routing.NextVar(index))
             time_var = time_dimension.CumulVar(index)
             plan_output += '{0} Time({1},{2})\n'.format(manager.IndexToNode(index),
@@ -157,85 +145,67 @@ class VehicleRouting:
             result['trip'].append({'point': manager.IndexToNode(index), 'min_time': solution.Min(time_var),
                                    'max_time': solution.Max(time_var)})
             result['time'] = solution.Min(time_var) - result['trip'][0].get('min_time')
-            plan_output += 'Time of the route: {}min\n'.format(
-                solution.Min(time_var))
+
             print(plan_output)
             total_time += solution.Min(time_var)
             results.append(result)
-        print('Routed')
-        print('Total time of all routes: {}min'.format(total_time))
         final_result = sorted(results, key=lambda k: len(k['trip']))[-1]
-        print(results)
 
         return final_result
 
-    def solve(self):
+    def solve_problem(self):
         """Solve the VRP with time windows."""
-        # Instantiate the data problem.
         data = self.create_data_model
 
-        # Create the routing index manager.
-        manager = pywrapcp.RoutingIndexManager(len(data['time_matrix']),
+        routing_index_manager = pywrapcp.RoutingIndexManager(len(data['time_matrix']),
                                                data['num_vehicles'], data['depot'])
 
-        # Create Routing Model.
-        routing = pywrapcp.RoutingModel(manager)
+        routing_model = pywrapcp.RoutingModel(routing_index_manager)
 
-        # Create and register a transit callback.
         def time_callback(from_index, to_index):
             """Returns the travel time between the two nodes."""
-            # Convert from routing variable Index to time matrix NodeIndex.
-            from_node = manager.IndexToNode(from_index)
-            to_node = manager.IndexToNode(to_index)
+            from_node = routing_index_manager.IndexToNode(from_index)
+            to_node = routing_index_manager.IndexToNode(to_index)
             return data['time_matrix'][from_node][to_node]
 
-        transit_callback_index = routing.RegisterTransitCallback(time_callback)
+        transit_callback_index = routing_model.RegisterTransitCallback(time_callback)
 
-        # Define cost of each arc.
-        routing.SetArcCostEvaluatorOfAllVehicles(transit_callback_index)
+        routing_model.SetArcCostEvaluatorOfAllVehicles(transit_callback_index)
 
-        # Add Time Windows constraint.
         time_per_vehicle = int(float(self.end_time) * MULTIPLIER)
-        print(time_per_vehicle)
         time = 'Time'
-        routing.AddDimension(
+        routing_model.AddDimension(
             transit_callback_index,
-            900,  # allow waiting time
-            time_per_vehicle,  # maximum time per vehicle
-            False,  # Don't force start cumul to zero.
+            900,  # 15min
+            time_per_vehicle,
+            False,
             time)
-        time_dimension = routing.GetDimensionOrDie(time)
-        # Add time window constraints for each location except depot.
+        time_dimension = routing_model.GetDimensionOrDie(time)
+
         for location_idx, time_window in enumerate(data['time_windows']):
-            if location_idx == 0:
+            if location_idx == self.depot:
                 continue
-            index = manager.NodeToIndex(location_idx)
-            print(time_window)
-            print(time_window[1])
+            index = routing_index_manager.NodeToIndex(location_idx)
             time_dimension.CumulVar(index).SetRange(int(time_window[0]), int(time_window[1]))
-        # Add time window constraints for each vehicle start node.
+
         for vehicle_id in range(data['num_vehicles']):
-            index = routing.Start(vehicle_id)
-            time_dimension.CumulVar(index).SetRange(data['time_windows'][0][0],
-                                                    data['time_windows'][0][1])
+            index = routing_model.Start(vehicle_id)
+            time_dimension.CumulVar(index).SetRange(data['time_windows'][self.depot][0],
+                                                    data['time_windows'][self.depot][1])
 
-        # Instantiate route start and end times to produce feasible times.
         for i in range(data['num_vehicles']):
-            routing.AddVariableMinimizedByFinalizer(
-                time_dimension.CumulVar(routing.Start(i)))
-            routing.AddVariableMinimizedByFinalizer(
-                time_dimension.CumulVar(routing.End(i)))
+            routing_model.AddVariableMinimizedByFinalizer(
+                time_dimension.CumulVar(routing_model.Start(i)))
+            routing_model.AddVariableMinimizedByFinalizer(
+                time_dimension.CumulVar(routing_model.End(i)))
 
-        # Setting first solution heuristic.
         search_parameters = pywrapcp.DefaultRoutingSearchParameters()
         search_parameters.first_solution_strategy = (
             routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC)
 
-        # Solve the problem.
-        solution = routing.SolveWithParameters(search_parameters)
+        solution = routing_model.SolveWithParameters(search_parameters)
 
-        # Print solution on console.
         if solution:
-            result = self.print_solution(data, manager, routing, solution)
+            result = self.prepare_solution(data, routing_index_manager, routing_model, solution)
             result['location_points'] = self.location_points
             return result

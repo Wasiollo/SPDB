@@ -46,12 +46,6 @@ class StartPointView(APIView):
 
         return Response(row)
 
-# SELECT ld.start_location_id, ld.end_location_id, all_time
-# FROM spdb.locations_distances ld
-# WHERE ld.start_location_id IN (1, 2, 3, 13, 19, 30)
-# AND ld.end_location_id IN (1, 2, 3, 13, 19, 30)
-# ORDER BY ld.start_location_id, ld.end_location_id;
-
 
 @api_view(['POST'])
 def plan_trip(request, format=None):
@@ -69,8 +63,6 @@ def plan_trip(request, format=None):
     trip_points_data = request.data.get('tripPoints')
     trip_points_data = sorted(trip_points_data, key=lambda k: k['location_id'])
     points_data = np.concatenate([food_data, trip_points_data])
-    print(food_data)
-    print(trip_points_data)
     points = []
 
     for food in food_data:
@@ -81,7 +73,6 @@ def plan_trip(request, format=None):
     points = sorted(points, key=lambda k: k['location_id'])
 
     depot = points.index(list(filter(lambda location: location['location_id'] == start_point, points))[0])
-    print("Depot: " + str(depot))
 
     with connection.cursor() as cursor:
         cursor.execute(
@@ -93,24 +84,23 @@ def plan_trip(request, format=None):
                 AND ld.end_location_id IN %(locations)s
                 ORDER BY ld.start_location_id, ld.end_location_id;
             """.format(vehicle + '_time'), {
-                    "locations": tuple([point.get('location_id') for point in points])
-                }
+                "locations": tuple([point.get('location_id') for point in points])
+            }
         )
         trip_times = fetch_data_as_dict(cursor)
 
     groups = itertools.groupby(trip_times, lambda x: x.get('start_location_id'))
 
-    trip_times_grouped = [{'start_location_id': k, 'items': [x.get('route_time') * MULTIPLIER for x in v]} for k, v in groups]
-    print(trip_times_grouped)
+    trip_times_grouped = [{'start_location_id': k, 'items': [x.get('route_time') * MULTIPLIER for x in v]} for k, v in
+                          groups]
 
     vehicle_num = 0
     routing_result = None
     while routing_result is None:
         vehicle_num += 1
-        routing = VehicleRouting(start_time, end_time, trip_points_data, food_data, trip_times_grouped, depot, vehicle_num)
-        routing_result = routing.solve()
-
-    print(routing_result)
+        routing = VehicleRouting(start_time, end_time, trip_points_data, food_data, trip_times_grouped, depot,
+                                 vehicle_num)
+        routing_result = routing.solve_problem()
 
     routed_trip = routing_result.get('trip')
     begin_time = routed_trip[0].get('min_time')
@@ -128,10 +118,8 @@ def plan_trip(request, format=None):
     print('Route time: ' + str(route_time / MULTIPLIER))
     print('Route start: ' + str(begin_time / MULTIPLIER))
     print('Route end: ' + str(last_time / MULTIPLIER))
-    print(routing_points)
 
     routing_query = create_routing_query(routing_points, vehicle)
-    print(routing_query)
     with connection.cursor() as cursor:
         cursor.execute(routing_query)
         routing_coordinates = fetch_data_as_dict(cursor)
@@ -142,9 +130,6 @@ def plan_trip(request, format=None):
             route.append({'lat': coordinate.get('start_y'), 'lng': coordinate.get('start_x')})
         route.append({'lat': coordinate.get('end_y'), 'lng': coordinate.get('end_x')})
 
-    print(route)
     response = {'route': route, 'start_time': begin_time, 'route_time': route_time, 'end_time': last_time}
-    print(response)
 
     return Response(response)
-
